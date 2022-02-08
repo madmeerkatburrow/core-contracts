@@ -67,7 +67,7 @@ contract VeVault is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         if (_unlockTime <= _now) return 0;
 
         // _lockedDays refers to the number of days that user's MMF is still locked for
-        uint256 _lockedDays = _unlockTime - _now;
+        uint256 _lockedDays = _unlockTime.sub(_now);
         if (_lockedDays >= 1460) {
             return _value;
         }
@@ -159,8 +159,8 @@ contract VeVault is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         } else {
             require(_value == 0, "Cannot increase amount and extend lock in the same tx");
             _vp = calculateBoostedAmount(_value, _days);
-            lockedEnd[_addr] = _end + _days;
-            require(_end - _now <= 1460, "Cannot extend lock to more than 4 years");
+            lockedEnd[_addr] = _end.add(_days);
+            require(_end.sub(_now) <= 1460, "Cannot extend lock to more than 4 years");
         }
         require(_vp > 0, "No benefit to lock");
         if (_value > 0) {
