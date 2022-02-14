@@ -137,8 +137,14 @@ contract VeVaultV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable, VaultStrat
         uint256 _lockedAmount = lockedAmount[msg.sender];
         uint256 _lockedEnd = lockedEnd[msg.sender];
         uint256 _now = getCurrentEpoch();
+
+        uint256 _userAmount = strategyBalanceOf(totalShares, _shares[msg.sender]);
+        totalShares = totalShares.sub(_shares[msg.sender]);
+        delete _shares[msg.sender];
+        uint256 mmfHarvested = _withdrawStakingToken(_userAmount);
+
         require(_lockedAmount > 0, "Nothing to withdraw");
-        uint256 _amount = _lockedAmount;
+        uint256 _amount = _userAmount;
         if (_now < _lockedEnd) {
             uint256 _fee = (_amount * 30000) / 100000; // 30% fees
             _penalize(_fee);
@@ -153,6 +159,8 @@ contract VeVaultV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable, VaultStrat
         MMF.safeTransfer(msg.sender, _amount);
 
         emit Withdraw(msg.sender, _amount, _now);
+
+        _harvest(mmfHarvested);
     }
 
     /* ========== Internal Functions ========== */
