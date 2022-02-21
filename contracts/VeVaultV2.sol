@@ -110,13 +110,13 @@ contract VeVaultV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable, VaultStrat
         uint256 _now = getCurrentEpoch();
         uint256 _lockedAmount = lockedAmount[msg.sender];
         uint256 _lockedEnd = lockedEnd[msg.sender];
+        require(_lockedAmount > 0, "Nothing to withdraw");
+        require(_now >= _lockedEnd, "The lock didn't expire");
 
         totalShares = totalShares.sub(_shares[msg.sender]);
         delete _shares[msg.sender];
         uint256 mmfHarvested = _withdrawStakingToken(_userAmount);
 
-        require(_lockedAmount > 0, "Nothing to withdraw");
-        require(_now >= _lockedEnd, "The lock didn't expire");
         lockedEnd[msg.sender] = 0;
         lockedAmount[msg.sender] = 0;
         veBalance[msg.sender] = 0;
