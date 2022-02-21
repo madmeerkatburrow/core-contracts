@@ -135,6 +135,8 @@ contract VeVaultV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable, VaultStrat
     // Applies a 30% penalisation fee
     function emergencyWithdraw() external nonReentrant {
         uint256 _lockedAmount = lockedAmount[msg.sender];
+        require(_lockedAmount > 0, "Nothing to withdraw");
+
         uint256 _lockedEnd = lockedEnd[msg.sender];
         uint256 _now = getCurrentEpoch();
 
@@ -143,7 +145,6 @@ contract VeVaultV2 is OwnableUpgradeable, ReentrancyGuardUpgradeable, VaultStrat
         delete _shares[msg.sender];
         uint256 mmfHarvested = _withdrawStakingToken(_userAmount);
 
-        require(_lockedAmount > 0, "Nothing to withdraw");
         uint256 _amount = _userAmount;
         if (_now < _lockedEnd) {
             uint256 _fee = (_amount * 30000) / 100000; // 30% fees
